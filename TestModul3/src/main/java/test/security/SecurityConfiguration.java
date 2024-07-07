@@ -3,7 +3,6 @@ package test.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -64,12 +63,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.headers().cacheControl().disable();
+		
+		httpSecurity.cors();
+		
 		httpSecurity
-				.cors().and()
 				.csrf().disable()
 				.sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-			/*	.and()
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+				.and().authorizeRequests().anyRequest().permitAll();
+				/*.and()
 				.authorizeRequests()
 				.antMatchers(HttpMethod.POST, "/api/korisnici/auth")
 					.permitAll()
@@ -87,27 +89,18 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOrigins(Arrays.asList("*"));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT"));
-		configuration.setAllowedHeaders(Arrays.asList("Content-Type", "content-type", "x-requested-with", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "x-auth-token", "x-app-id", "Origin","Accept", "X-Requested-With", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+		configuration.setAllowedHeaders(Arrays.asList("*"));
+
+		// allow Authorization header
+		configuration.setAllowCredentials(true);
+
+		// number of seconds for how long the response to the preflight request can be cached without sending another preflight request
+		configuration.setMaxAge(Long.valueOf(3600));
+
+		configuration.setExposedHeaders(Arrays.asList("Total-Pages"));
+
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
 	}
-
-	/*@Configuration
-	public static class WebConfig implements WebMvcConfigurer {
-		@Override
-		public void addCorsMappings(CorsRegistry registry) {
-			/*registry.addMapping("/api/filmovi")
-					.allowedOrigins("https://localhost:8080", "https://localhost:3000")
-					.allowedMethods("OPTIONS", "HEAD", "GET", "PUT", "POST", "DELETE", "PATCH")
-					.allowCredentials(true)
-					.maxAge(3600);*/
-
-			/*registry.addMapping("/**")
-					.allowedOrigins("*")
-					.allowedMethods("OPTIONS", "HEAD", "GET", "PUT", "POST", "DELETE", "PATCH")
-					.allowCredentials(true)
-					.maxAge(3600);
-		}
-	}*/
 }
