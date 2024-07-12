@@ -6,12 +6,21 @@ import { Navbar, Nav, Container, Button } from 'react-bootstrap'
 import { logout } from './services/auth'
 import NotFound from './NotFound'
 import Login from './authorization/Login'
+import { jwtDecode } from 'jwt-decode'
 
 
 
 const App = () => {
 
-    if(window.localStorage['jwt']){
+    let loggedIn = !!localStorage.getItem('jwt') ? jwtDecode(localStorage.getItem('jwt')) : null
+    // console.log(loggedIn)
+    const loginInfo = {
+        isAdmin: loggedIn?.role.authority === 'ROLE_ADMIN',
+        isUser: loggedIn?.role.authority === 'ROLE_KORISNIK',
+        name: loggedIn?.sub
+    }
+
+    if(loggedIn){
         return(
         <>
             <Router>
